@@ -1,5 +1,5 @@
-import is_nucleic_acid
-import complement
+from . import is_nucleic_acid
+from . import complement
 from typing import Union
 
 

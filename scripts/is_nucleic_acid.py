@@ -1,4 +1,4 @@
-import which_nucleic_acid
+from . import which_nucleic_acid
 
 
 def is_nucleic_acid(sequence: str) -> bool:

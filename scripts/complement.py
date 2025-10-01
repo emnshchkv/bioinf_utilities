@@ -1,4 +1,4 @@
-import which_nucleic_acid
+from . import which_nucleic_acid
 from typing import Union
 
 
