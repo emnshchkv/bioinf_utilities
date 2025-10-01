@@ -1,9 +1,11 @@
 def which_nucleic_acid(
-    sequence: str, dna_alphabet: set =set("ATGCatgc"), rna_alphabet: set=set("AUGCaugc")
+    sequence: str,
+    dna_alphabet: set = set("ATGCatgc"),
+    rna_alphabet: set = set("AUGCaugc"),
 ) -> str:
     """
     Determines the type of nucleic acid for a sequence.
-    
+
     Arguments:
     sequence: str
     dna_alphabet: set
