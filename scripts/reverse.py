@@ -12,5 +12,6 @@ def reverse(sequence: str) -> str:
     str: reversed sequence
     None: if sequence is NOT a nucleic acid
     """
-    if is_nucleic_acid(sequence):
+    if is_nucleic_acid.is_nucleic_acid(sequence):
         return sequence[::-1]
+r

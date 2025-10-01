@@ -12,7 +12,7 @@ def is_nucleic_acid(sequence: str) -> bool:
     True: if sequence is a nucleic acid
     False: if sequence is NOT a nucleic acid
     """
-    if which_nucleic_acid(sequence) is None:
+    if which_nucleic_acid.which_nucleic_acid(sequence) is None:
         return False
     else:
         return True
