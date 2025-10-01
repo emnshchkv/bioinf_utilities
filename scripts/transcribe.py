@@ -1,4 +1,5 @@
 import is_nucleic_acid
+from typing import Union
 
 
 def transcribe(
@@ -13,7 +14,7 @@ def transcribe(
         "C": "G",
         "c": "g",
     },
-) -> str:
+) -> Union[str, None]:
     """
     Generates a trancsript for a DNA sequence.
 

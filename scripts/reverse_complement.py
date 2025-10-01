@@ -1,8 +1,9 @@
 import is_nucleic_acid
 import complement
+from typing import Union
 
 
-def reverse_complement(sequence: str) -> str:
+def reverse_complement(sequence: str) -> Union[str, None]:
     """
     Converts a sequence into its reverse-complement counterpart.
 

@@ -1,7 +1,8 @@
 import which_nucleic_acid
+from typing import Union
 
 
-def complement(sequence: str) -> str:
+def complement(sequence: str) -> Union[str, None]:
     """
     Converts a sequence into its complement counterpart.
 

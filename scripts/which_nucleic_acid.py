@@ -1,8 +1,11 @@
+from typing import Union
+
+
 def which_nucleic_acid(
     sequence: str,
     dna_alphabet: set = set("ATGCatgc"),
     rna_alphabet: set = set("AUGCaugc"),
-) -> str:
+) -> Union[str, None]:
     """
     Determines the type of nucleic acid for a sequence.
 

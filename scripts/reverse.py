@@ -1,7 +1,8 @@
 import is_nucleic_acid
+from typing import Union
 
 
-def reverse(sequence: str) -> str:
+def reverse(sequence: str) -> Union[str, None]:
     """
     Converts a sequence into its reverse counterpart.
 
