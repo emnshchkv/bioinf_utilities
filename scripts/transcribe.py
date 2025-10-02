@@ -1,9 +1,18 @@
-from . import is_nucleic_acid
+from . import is_dna
 from typing import Union
 
 
-def transcribe(
-    sequence: str,
+def transcribe(sequence: str) -> Union[str, None]:
+    """
+    Generates a mRNA-trancsript for a DNA sequence.
+
+    Arguments:
+    sequence: str
+
+    Returns:
+    str: for a DNA sequence
+    None: for a RNA sequence
+    """
     transcription_dict: dict = {
         "A": "U",
         "a": "u",
@@ -13,23 +22,6 @@ def transcribe(
         "g": "c",
         "C": "G",
         "c": "g",
-    },
-) -> Union[str, None]:
-    """
-    Generates a trancsript for a DNA sequence.
-
-    Arguments:
-    sequence: str
-    transcription_dict: dict
-
-    Returns:
-    str: for a DNA sequence
-    None: for a RNA sequence
-    """
-    if is_nucleic_acid.is_nucleic_acid(sequence):
-        mrna = ""
-        for nucleotide in sequence:
-            mrna += transcription_dict[nucleotide]
-        return mrna
-    else:
-        return None
+    }
+    if is_dna.is_dna(sequence):
+        return "".join([transcription_dict[n] for n in sequence])
