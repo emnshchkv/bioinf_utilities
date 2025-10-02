@@ -1,14 +1,19 @@
 from scripts import (
-    which_nucleic_acid,
+    is_rna,
+    is_dna,
     is_nucleic_acid,
     transcribe,
     reverse,
     complement,
     reverse_complement,
+    gc_score,
+    quality_score,
+    interval,
 )
+from typing import Union
 
 
-def run_dna_rna_tools(*funnel: str):
+def run_dna_rna_tools(*funnel: str) -> Union[str, list[str | None], bool]:
     """
     Processing DNA or RNA sequnce.
 
@@ -27,10 +32,10 @@ def run_dna_rna_tools(*funnel: str):
         raise ValueError(
             "At least one sequence and the name of the operation must be given."
         )
-    sequences = funnel[:-1]
-    tool_name = funnel[-1]
+    *sequences, tool_name = funnel
     tools = {
-        "which_nucleic_acid": which_nucleic_acid.which_nucleic_acid,
+        "is_rna": is_rna.is_rna,
+        "is_dna": is_dna.is_dna,
         "is_nucleic_acid": is_nucleic_acid.is_nucleic_acid,
         "transcribe": transcribe.transcribe,
         "reverse": reverse.reverse,
@@ -44,3 +49,36 @@ def run_dna_rna_tools(*funnel: str):
     current_tool = tools[tool_name]
     result = [current_tool(seq) for seq in sequences]
     return result[0] if len(result) == 1 else result
+
+
+def filter_fastq(
+    seqs: dict[str, tuple[str, str]],
+    gc_bounds: int | tuple[int | float, int | float] = (0, 100),
+    length_bounds: int | tuple[int, int] = (0, 2**32),
+    quality_threshold: int = 0,
+) -> dict:
+    """
+    Filtering fastq with manual settings.
+
+    Agruments:
+    seqs: dict
+    gc_bounds: int | tuple
+    length_bounds: int | tuple
+    quality_threshold: int
+
+    Returns:
+    dict: filtered fastq
+    """
+    filtered = dict()
+    (gc_lower_bound, gc_upper_bound), (len_lower_bound, len_upper_bound) = (
+        interval.interval(gc_bounds),
+        interval.interval(length_bounds),
+    )
+    for name, data in seqs.items():
+        if (
+            (gc_lower_bound <= gc_score.gc_score(data[0]) <= gc_upper_bound)
+            and (quality_threshold <= quality_score.quality_score(data[1]))
+            and (len_lower_bound <= len(data[0]) <= len_upper_bound)
+        ):
+            filtered[name] = data
+    return filtered
