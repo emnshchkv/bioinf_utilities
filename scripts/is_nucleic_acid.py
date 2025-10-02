@@ -1,4 +1,4 @@
-from . import which_nucleic_acid
+from . import is_rna, is_dna
 
 
 def is_nucleic_acid(sequence: str) -> bool:
@@ -12,7 +12,8 @@ def is_nucleic_acid(sequence: str) -> bool:
     True: if sequence is a nucleic acid
     False: if sequence is NOT a nucleic acid
     """
-    if which_nucleic_acid.which_nucleic_acid(sequence) is None:
-        return False
-    else:
+    if is_rna.is_rna(sequence):
         return True
+    elif is_dna.is_dna(sequence):
+        return True
+    return False
