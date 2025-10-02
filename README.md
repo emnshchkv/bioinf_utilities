@@ -52,7 +52,7 @@ results = run_dna_rna_tools("ATCG", "GCTA", "complement")
 
 ### FASTQ Filtering
 
-The `filter_fastq()` function filters FASTQ sequences based on GC content, length, and quality scores:
+The `filter_fastq()` function filters FASTQ sequences based on GC-content, length, and quality scores:
 
 ```python
 from bioinf_utilities import filter_fastq
@@ -69,16 +69,16 @@ filtered = filter_fastq(fastq_data)
 # Filter with custom parameters
 filtered = filter_fastq(
     fastq_data,
-    gc_bounds=(40, 60),
+    gc_bounds=(60.5),
     length_bounds=(50, 150),
     quality_threshold=20
 )
 ```
 
 **Parameters:**
-- `seqs`: Dictionary with sequence names as keys and tuples of (sequence, quality) as values
-- `gc_bounds`: GC content bounds as integer (exact) or tuple (min, max). Default: (0, 100)
-- `length_bounds`: Length bounds as integer (exact) or tuple (min, max). Default: (0, 2^32)
+- `seqs`: Dictionary with sequence IDs as keys and tuples of (sequence, quality) as values
+- `gc_bounds`: GC-content bounds as integer or float (max) or tuple (min, max). Default: (0, 100)
+- `length_bounds`: Length bounds as integer or float (max) or tuple (min, max). Default: (0, 2^32)
 - `quality_threshold`: Minimum quality score threshold. Default: 0
 
 **Returns:**
@@ -86,6 +86,4 @@ filtered = filter_fastq(
 
 ## Error Handling
 
-- Invalid tool names will raise `KeyError` with available options
-- Insufficient arguments will raise `ValueError`
 - Functions include type hints for better development experience
