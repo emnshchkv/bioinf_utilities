@@ -1,4 +1,4 @@
-from . import which_nucleic_acid
+from . import is_rna, is_dna
 from typing import Union
 
 
@@ -14,7 +14,7 @@ def complement(sequence: str) -> Union[str, None]:
     None: if sequence is NOT a nucleic acid
 
     """
-    if which_nucleic_acid.which_nucleic_acid(sequence) == "DNA":
+    if is_dna.is_dna(sequence):
         comp_dict = {
             "A": "T",
             "a": "t",
@@ -25,11 +25,7 @@ def complement(sequence: str) -> Union[str, None]:
             "C": "G",
             "c": "g",
         }
-        countepart = ""
-        for nucleotide in sequence:
-            countepart += comp_dict[nucleotide]
-        return countepart
-    elif which_nucleic_acid.which_nucleic_acid(sequence) == "RNA":
+    elif is_rna.is_rna(sequence):
         comp_dict = {
             "A": "U",
             "a": "u",
@@ -40,9 +36,9 @@ def complement(sequence: str) -> Union[str, None]:
             "C": "G",
             "c": "g",
         }
-        countepart = ""
-        for nucleotide in sequence:
-            countepart += comp_dict[nucleotide]
-        return countepart
     else:
         return None
+    countepart = ""
+    for nucleotide in sequence:
+        countepart += comp_dict[nucleotide]
+    return countepart
