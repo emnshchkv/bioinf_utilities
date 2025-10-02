@@ -1,5 +1,4 @@
-from . import is_nucleic_acid
-from . import complement
+from . import is_nucleic_acid, complement, reverse
 from typing import Union
 
 
@@ -15,7 +14,4 @@ def reverse_complement(sequence: str) -> Union[str, None]:
     None: if sequence is NOT a nucleic acid
     """
     if is_nucleic_acid.is_nucleic_acid(sequence):
-        comp_seq = complement.complement(sequence)
-        return comp_seq[::-1]
-    else:
-        return None
+        return complement.complement(reverse.reverse(sequence))
