@@ -5,16 +5,9 @@ Personal collection of Python utilities for processing DNA and RNA sequences and
 ## Usage
 
 The script requires the following modules in the `scripts` directory:
-   - `is_rna`
-   - `is_dna` 
-   - `is_nucleic_acid`
-   - `transcribe`
-   - `reverse`
-   - `complement`
-   - `reverse_complement`
-   - `gc_score`
-   - `quality_score`
-   - `interval`
+   - `dna_rna_tools`
+   - `filter_fastq_tools` 
+   - `assistant_utilities`
 
 ### DNA/RNA Sequence Tools
 
