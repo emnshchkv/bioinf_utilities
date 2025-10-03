@@ -1,15 +1,4 @@
-from scripts import (
-    is_rna,
-    is_dna,
-    is_nucleic_acid,
-    transcribe,
-    reverse,
-    complement,
-    reverse_complement,
-    gc_score,
-    quality_score,
-    interval,
-)
+from scripts import dna_rna_tools, filter_fastq_tools, assistant_ulitities
 from typing import Union
 
 
@@ -34,13 +23,13 @@ def run_dna_rna_tools(*funnel: str) -> Union[str, list[str | None], bool]:
         )
     *sequences, tool_name = funnel
     tools = {
-        "is_rna": is_rna.is_rna,
-        "is_dna": is_dna.is_dna,
-        "is_nucleic_acid": is_nucleic_acid.is_nucleic_acid,
-        "transcribe": transcribe.transcribe,
-        "reverse": reverse.reverse,
-        "complement": complement.complement,
-        "reverse_complement": reverse_complement.reverse_complement,
+        "is_rna": dna_rna_tools.is_rna,
+        "is_dna": dna_rna_tools.is_dna,
+        "is_nucleic_acid": dna_rna_tools.is_nucleic_acid,
+        "transcribe": dna_rna_tools.transcribe,
+        "reverse": dna_rna_tools.reverse,
+        "complement": dna_rna_tools.complement,
+        "reverse_complement": dna_rna_tools.reverse_complement,
     }
     if tool_name not in tools.keys():
         raise KeyError(
@@ -71,13 +60,13 @@ def filter_fastq(
     """
     filtered = dict()
     (gc_lower_bound, gc_upper_bound), (len_lower_bound, len_upper_bound) = (
-        interval.interval(gc_bounds),
-        interval.interval(length_bounds),
+        assistant_ulitities.make_interval(gc_bounds),
+        assistant_ulitities.make_interval(length_bounds),
     )
     for name, data in seqs.items():
         if (
-            (gc_lower_bound <= gc_score.gc_score(data[0]) <= gc_upper_bound)
-            and (quality_threshold <= quality_score.quality_score(data[1]))
+            (gc_lower_bound <= filter_fastq_tools.gc_score(data[0]) <= gc_upper_bound)
+            and (quality_threshold <= filter_fastq_tools.quality_score(data[1]))
             and (len_lower_bound <= len(data[0]) <= len_upper_bound)
         ):
             filtered[name] = data
