@@ -1,3 +1,4 @@
+import os
 from scripts import dna_rna_tools, filter_fastq_tools, assistant_ulitities
 from typing import Union
 
@@ -42,12 +43,12 @@ def run_dna_rna_tools(*funnel: str) -> Union[str, list[str | None], bool]:
 
 def filter_fastq(
     *fastq_path: str,
-    gc_bounds: int | tuple[int | float, int | float] = (0, 100),
+    gc_bounds: int | float | tuple[int | float, int | float] = (0, 100),
     length_bounds: int | tuple[int, int] = (0, 2**32),
-    quality_threshold: int = 0,
+    quality_threshold: int | float = 0,
 ) -> None:
     """
-    Filtering fastq with manual settings.
+    Filters *.fastq with manual settings and save it to 'output.fastq'.
 
     Agruments:
     *fastq_path: absolute path to *.fastq
@@ -58,17 +59,32 @@ def filter_fastq(
     Returns:
     None
     """
-    filtered_sequences = dict()
     (gc_lower_bound, gc_upper_bound), (len_lower_bound, len_upper_bound) = (
         assistant_ulitities.make_interval(gc_bounds),
         assistant_ulitities.make_interval(length_bounds),
     )
-    seqs = filter_fastq_tools.read_fastq(*fastq_path)
-    for name, data in seqs.items():
-        if (
-            (gc_lower_bound <= filter_fastq_tools.gc_score(data[0]) <= gc_upper_bound)
-            and (quality_threshold <= filter_fastq_tools.quality_score(data[1]))
-            and (len_lower_bound <= len(data[0]) <= len_upper_bound)
-        ):
-            filtered_sequences[name] = data
-    filter_fastq_tools.write_fastq(filtered_sequences)
+    output_dir = os.path.join(os.path.dirname(os.path.join(*fastq_path)), "filtered")
+    os.makedirs(output_dir, exist_ok=True)
+    input_path = os.path.join(*fastq_path)
+    output_path = os.path.join(output_dir, "output.fastq")
+
+    with open(input_path, "r") as input_fastq, open(output_path, "a") as output_fastq:
+        while True:
+            identifier = input_fastq.readline().strip()
+            if not identifier:
+                break
+            sequence = input_fastq.readline().strip()
+            _ = input_fastq.readline()
+            quality = input_fastq.readline().strip()
+            if filter_fastq_tools.is_suitable_fastq(
+                sequence,
+                quality,
+                gc_lower_bound,
+                gc_upper_bound,
+                len_lower_bound,
+                len_upper_bound,
+                quality_threshold,
+            ):
+                output_fastq.write(
+                    identifier + "\n" + sequence + "\n" + "+" + "\n" + quality
+                )
