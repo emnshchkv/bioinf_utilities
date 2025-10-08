@@ -1,3 +1,6 @@
+import os
+
+
 def gc_score(sequence: str) -> float:
     """
     Calculates GC-content score of a sequence.
@@ -29,3 +32,28 @@ def quality_score(quality_line: str) -> float:
     for sym in quality_line:
         total_score += encoding[sym]
     return total_score / len(quality_line)
+
+
+def read_fastq(*directories: str) -> dict:
+    """
+    Converts *.fastq into 'name: (sequence, quality)' dictionary.
+
+    Arguments:
+    *directores: absolute path
+
+    Returns:
+    dict[str, tuple[str, str]]
+    """
+    fastq_sequences = dict()
+    with open(os.path.join(*directories), "r") as fastq:
+        while True:
+            identifier = fastq.readline().strip()
+            if not identifier:
+                break
+            id_data = identifier.split(sep=":")
+            name = id_data[0]
+            sequence = fastq.readline().strip()
+            _ = fastq.readline()
+            quality = fastq.readline().strip()
+            fastq_sequences[name] = (sequence, quality)
+    return fastq_sequences
