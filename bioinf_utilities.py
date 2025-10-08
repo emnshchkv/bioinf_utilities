@@ -42,7 +42,7 @@ def run_dna_rna_tools(*funnel: str) -> Union[str, list[str | None], bool]:
 
 
 def filter_fastq(
-    *fastq_path: str,
+    fastq_path: str,
     gc_bounds: int | float | tuple[int | float, int | float] = (0, 100),
     length_bounds: int | tuple[int, int] = (0, 2**32),
     quality_threshold: int | float = 0,
@@ -51,7 +51,7 @@ def filter_fastq(
     Filters *.fastq with manual settings and save it to 'output.fastq'.
 
     Agruments:
-    *fastq_path: absolute path to *.fastq
+    fastq_path: absolute path to *.fastq
     gc_bounds: int | tuple
     length_bounds: int | tuple
     quality_threshold: int
@@ -63,9 +63,9 @@ def filter_fastq(
         assistant_ulitities.make_interval(gc_bounds),
         assistant_ulitities.make_interval(length_bounds),
     )
-    output_dir = os.path.join(os.path.dirname(os.path.join(*fastq_path)), "filtered")
+    output_dir = os.path.join(os.path.dirname(os.path.join(fastq_path)), "filtered")
     os.makedirs(output_dir, exist_ok=True)
-    input_path = os.path.join(*fastq_path)
+    input_path = os.path.join(fastq_path)
     output_path = os.path.join(output_dir, "output.fastq")
 
     with open(input_path, "r") as input_fastq, open(output_path, "a") as output_fastq:
