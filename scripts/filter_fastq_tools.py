@@ -70,5 +70,5 @@ def write_fastq(filtered_sequences: dict[str, tuple[str, str]]) -> None:
     with open(os.path.join(".", "filtered", "output.fastq"), "a") as filtered_fastq:
         for identifier, data in filtered_sequences.items():
             filtered_fastq.write(
-                identifier + "\n" + data[0] + "\n" + "+" + "\n" + identifier[1]
+                identifier + "\n" + data[0] + "\n" + "+" + "\n" + data[1]
             )
