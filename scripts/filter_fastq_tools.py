@@ -29,3 +29,39 @@ def quality_score(quality_line: str) -> float:
     for sym in quality_line:
         total_score += encoding[sym]
     return total_score / len(quality_line)
+
+
+def is_suitable_fastq(
+    sequence: str,
+    quality_line: str,
+    gc_lower: int | float,
+    gc_upper: int | float,
+    len_lower: int | float,
+    len_upper: int | float,
+    quality_threshold: int | float,
+) -> bool:
+    """
+    Determines if sequence should be kept based on filtering criteria.
+
+    Arguments:
+    sequence: str
+    quality: str
+    gc_lower: int | float
+    gc_upper: int | float
+    len_lower: int
+    len_upper: int
+    quality_thresh: int | float
+
+    Returns:
+    True: if sequence passes all filters
+    False: if sequence DOES DOT pass all filters
+    """
+    gc_content = gc_score(sequence)
+    sequence_quality = quality_score(quality_line)
+    sequence_length = len(sequence)
+
+    return (
+        gc_lower <= gc_content <= gc_upper
+        and len_lower <= sequence_length <= len_upper
+        and sequence_quality >= quality_threshold
+    )
