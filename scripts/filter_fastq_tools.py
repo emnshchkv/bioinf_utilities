@@ -56,3 +56,17 @@ def read_fastq(*input_path: str) -> dict:
             fastq_sequences[identifier] = (sequence, quality)
     return fastq_sequences
 
+def write_fastq(filtered_sequences: dict[str, tuple[str, str]]) -> None:
+    '''
+    Saves filtered FASTQ to './filtered/output.fastq'.
+    
+    Arguments:
+    filtered_sequences: dict
+    
+    Returns:
+    None
+    '''
+    with open(os.path.join('.', 'filtered', 'output.fastq'), 'a') as filtered_fastq:
+        for identifier, data in filtered_sequences.items():
+            filtered_fastq.write(identifier + '\n' + data[0] + '\n' + '+' + '\n' + data[1])
+    
