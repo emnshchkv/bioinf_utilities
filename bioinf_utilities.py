@@ -72,7 +72,7 @@ def filter_fastq(
             if not identifier:
                 break
             sequence = input_fastq.readline().strip()
-            _ = input_fastq.readline()
+            _ = input_fastq.readline().strip()
             quality = input_fastq.readline().strip()
             if filter_fastq_tools.is_suitable_fastq(
                 sequence,
@@ -84,5 +84,5 @@ def filter_fastq(
                 quality_threshold,
             ):
                 output_fastq.write(
-                    identifier + "\n" + sequence + "\n" + "+" + "\n" + quality
+                    identifier + "\n" + sequence + "\n" + _ + "\n" + quality
                 )
