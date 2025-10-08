@@ -1,4 +1,5 @@
 from typing import Union
+import os
 
 
 def make_interval(
@@ -17,3 +18,19 @@ def make_interval(
         return (0, obj)
     else:
         return (obj[0], obj[1])
+
+
+def make_output_path(input_path: str, file_name: str) -> str:
+    """
+    Creates a directory for output file based on the path of the input file.
+
+    Arguments:
+    input_path: str
+    file_name: str
+
+    Returns:
+    str: full path to the output file with the specified name
+    """
+    output_dir = os.path.dirname(input_path)
+    os.makedirs(output_dir, exist_ok=True)
+    return os.path.join(output_dir, file_name)
