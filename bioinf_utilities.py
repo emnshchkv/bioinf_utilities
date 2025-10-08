@@ -63,10 +63,8 @@ def filter_fastq(
         assistant_ulitities.make_interval(gc_bounds),
         assistant_ulitities.make_interval(length_bounds),
     )
-    output_dir = os.path.join(os.path.dirname(os.path.join(fastq_path)), "filtered")
-    os.makedirs(output_dir, exist_ok=True)
     input_path = os.path.join(fastq_path)
-    output_path = os.path.join(output_dir, "output.fastq")
+    output_path = assistant_ulitities.make_output_path(fastq_path, "output.fastq")
 
     with open(input_path, "r") as input_fastq, open(output_path, "a") as output_fastq:
         while True:
