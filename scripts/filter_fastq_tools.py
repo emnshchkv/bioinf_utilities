@@ -36,7 +36,7 @@ def quality_score(quality_line: str) -> float:
 
 def read_fastq(*directories: str) -> dict:
     """
-    Converts *.fastq into 'name: (sequence, quality)' dictionary.
+    Converts *.fastq into 'identifier: (sequence, quality)' dictionary.
 
     Arguments:
     *directores: absolute path
@@ -50,10 +50,9 @@ def read_fastq(*directories: str) -> dict:
             identifier = fastq.readline().strip()
             if not identifier:
                 break
-            id_data = identifier.split(sep=":")
-            name = id_data[0]
             sequence = fastq.readline().strip()
             _ = fastq.readline()
             quality = fastq.readline().strip()
-            fastq_sequences[name] = (sequence, quality)
+            fastq_sequences[identifier] = (sequence, quality)
     return fastq_sequences
+
