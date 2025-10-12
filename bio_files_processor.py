@@ -20,25 +20,30 @@ def convert_multiline_fasta_to_oneline(
     else:
         output_path = os.path.join(output_fasta)
     input_path = os.path.join(input_fasta)
-    with open(input_path, "r") as input_fasta_file, open(output_path, "a") as output_fasta_file:
+    with open(input_path, "r") as input_fasta_file, open(
+        output_path, "a"
+    ) as output_fasta_file:
         current_sequence = []
         name = None
         for line in input_fasta_file:
             line = line.strip()
             if line.startswith(">"):
                 if name is not None:
-                    output_fasta_file.write(name + "\n" + "".join(current_sequence) + "\n")
+                    output_fasta_file.write(
+                        name + "\n" + "".join(current_sequence) + "\n"
+                    )
                 name = line
                 current_sequence = []
             else:
                 current_sequence.append(line)
         if name is not None:
             output_fasta_file.write(name + "\n" + "".join(current_sequence) + "\n")
- 
+
+
 def parse_blast_output(input_file: str, output_file: str | None = None) -> None:
     """
     Parses the BLAST_output_file.txt and extracts the first protein from the Description column for each QUERY.
-    
+
     Arguments:
     input_file: absolute path to BLAST_output_file.txt
     output_file: absolute path to the extracted proteins
@@ -47,30 +52,31 @@ def parse_blast_output(input_file: str, output_file: str | None = None) -> None:
     None
     """
     if output_file is None:
-        output_path = assistant_ulitities.make_output_path(input_file, "output_parse_blast.txt")
+        output_path = assistant_ulitities.make_output_path(
+            input_file, "output_parse_blast.txt"
+        )
     else:
         output_path = os.path.join(output_file)
     input_path = os.path.join(input_file)
-    with open(input_path, 'r') as blast_output, open(output_path, 'a') as parsed_blast_output:
-        extracted = dict()
-        query = ''
+    with open(input_path, "r") as blast_output, open(
+        output_path, "a"
+    ) as parsed_blast_output:
+        query = ""
         placed_in_section, table_start = False, False
         for line in blast_output:
             line = line.strip()
-            if line.startswith('Query #'):
+            if line.startswith("Query #"):
                 query = line
                 continue
-            if 'Sequences producing significant alignments:' in line:
+            if "Sequences producing significant alignments:" in line:
                 placed_in_section = True
                 continue
-            if 'Description' in line:
+            if "Description" in line:
                 table_start = True
                 continue
             if query and placed_in_section and table_start:
-                columns = re.split(r'\s{2,}', line)
-                extracted[query] = columns[0]
-                query = ''
+                columns = re.split(r"\s{2,}|\.{3,}", line)
+                parsed_blast_output.write(query + "\n" + columns[0].strip() + "\n")
+                query = ""
                 placed_in_section, table_start = False, False
             continue
-        for query, protein in extracted.items():
-            parsed_blast_output.write(query + '\n' + protein + '\n')
