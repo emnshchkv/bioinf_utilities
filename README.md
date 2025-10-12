@@ -90,7 +90,7 @@ The `bio_files_processor` module provides utilities for working with common biol
 #### FASTA File Conversion
 
 ```python
-from scripts.bio_files_processor import convert_multiline_fasta_to_oneline
+from bio_files_processor import convert_multiline_fasta_to_oneline
 
 # Convert multi-line FASTA to single-line format
 convert_multiline_fasta_to_oneline("input.fasta", "output.fasta")
@@ -104,7 +104,7 @@ convert_multiline_fasta_to_oneline("input.fasta", "output.fasta")
 #### BLAST Output Parsing
 
 ```python
-from scripts.bio_files_processor import parse_blast_output
+from bio_files_processor import parse_blast_output
 
 # Extract first protein from Description column for each BLAST query
 parse_blast_output("blast_results.txt", "extracted_proteins.txt")
