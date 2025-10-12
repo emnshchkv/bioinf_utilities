@@ -22,12 +22,7 @@ def quality_score(quality_line: str) -> float:
     Returns:
     float: average sequence quality
     """
-    encoding = dict()
-    for x in range(0, 41):
-        encoding.update({chr(x + 33): int(x)})
-    total_score = 0
-    for sym in quality_line:
-        total_score += encoding[sym]
+    total_score = sum(ord(sym) - 33 for sym in quality_line)
     return total_score / len(quality_line)
 
 
