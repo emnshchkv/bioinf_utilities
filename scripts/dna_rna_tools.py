@@ -14,9 +14,7 @@ def is_dna(sequence: str) -> bool:
     """
     dna_alphabet = set("ATGCatgc")
     unique_nucleotides = set(sequence)
-    if unique_nucleotides <= dna_alphabet:
-        return True
-    return False
+    return unique_nucleotides <= dna_alphabet
 
 
 def is_rna(sequence: str) -> bool:
@@ -32,9 +30,7 @@ def is_rna(sequence: str) -> bool:
     """
     rna_alphabet = set("AUGCaugc")
     unique_nucleotides = set(sequence)
-    if unique_nucleotides <= rna_alphabet:
-        return True
-    return False
+    return unique_nucleotides <= rna_alphabet
 
 
 def is_nucleic_acid(sequence: str) -> bool:
@@ -48,11 +44,7 @@ def is_nucleic_acid(sequence: str) -> bool:
     True: if sequence is a nucleic acid
     False: if sequence is NOT a nucleic acid
     """
-    if is_rna(sequence):
-        return True
-    elif is_dna(sequence):
-        return True
-    return False
+    return is_rna(sequence) or is_dna(sequence)
 
 
 def reverse(sequence: str) -> Union[str, None]:
