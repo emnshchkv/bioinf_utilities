@@ -1,45 +1,6 @@
 import os
-from scripts import dna_rna_tools, filter_fastq_tools, assistant_ulitities
+from scripts import filter_fastq_tools, assistant_ulitities
 from typing import Union
-
-
-def run_dna_rna_tools(*funnel: str) -> Union[str, list[str | None], bool]:
-    """
-    Processing DNA or RNA sequnce.
-
-    Arguments:
-    funnel : tuple[str]
-
-    Returns:
-    str: if single sequence was given
-    list: if several sequences were given
-
-    Raises error:
-    if tool is unknown
-    if no agruments are given
-    """
-    if len(funnel) < 2:
-        raise ValueError(
-            "At least one sequence and the name of the operation must be given."
-        )
-    *sequences, tool_name = funnel
-    tools = {
-        "is_rna": dna_rna_tools.is_rna,
-        "is_dna": dna_rna_tools.is_dna,
-        "is_nucleic_acid": dna_rna_tools.is_nucleic_acid,
-        "transcribe": dna_rna_tools.transcribe,
-        "reverse": dna_rna_tools.reverse,
-        "complement": dna_rna_tools.complement,
-        "reverse_complement": dna_rna_tools.reverse_complement,
-    }
-    if tool_name not in tools.keys():
-        raise KeyError(
-            f"Unknown tool: {tool_name}. Available tools: {list(tools.keys())}"
-        )
-    current_tool = tools[tool_name]
-    result = [current_tool(seq) for seq in sequences]
-    return result[0] if len(result) == 1 else result
-
 
 def filter_fastq(
     fastq_path: str,
