@@ -54,7 +54,7 @@ from bioseq_machinery import DNASequence, RNASequence, AminoAcidSequence
 dna = DNASequence("ATGCGTAt")
 print(dna)                       # Oligonucleotide : ATGCGTAt
 print(dna.complement())           # TACGCATa
-print(dna.reverse_complement())   # tAACGCAT? wait, example: better to use a real sequence
+print(dna.reverse_complement())   # aTACGCAT
 rna = dna.transcribe()            # RNASequence object
 print(rna)                        # Oligonucleotide : UACGCAUa
 
