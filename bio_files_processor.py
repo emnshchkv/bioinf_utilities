@@ -1,8 +1,25 @@
 import os, re
 from scripts import assistant_ulitities
+from Bio import SeqIO
+
+def convert_multiline_fasta_to_oneline(input_path: str, output_path: str) -> None:
+    """
+    Convertы a FASTA file with multiline sequences into a FASTA file 
+    where each sequence is written on a single line.
+
+    Args:
+        input_path (str): Path to the input FASTA file (multiline format).
+        output_path (str): Path to the output FASTA file (one-line format).
+
+    Returns:
+        None: The converted FASTA file is written to output_path.
+    """
+    with open(input_path, 'r') as multiline, open(output_path, 'w') as oneline:
+        records = SeqIO.parse(multiline, 'fasta')
+        SeqIO.write(records, oneline, 'fasta')
 
 
-def convert_multiline_fasta_to_oneline(
+def convert_multiline_fasta_to_oneline_old(
     input_fasta: str, output_fasta: str | None = None
 ) -> None:
     """
