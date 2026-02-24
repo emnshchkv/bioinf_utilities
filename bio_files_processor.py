@@ -2,9 +2,10 @@ import os, re
 from scripts import assistant_ulitities
 from Bio import SeqIO
 
+
 def convert_multiline_fasta_to_oneline(input_path: str, output_path: str) -> None:
     """
-    Convertы a FASTA file with multiline sequences into a FASTA file 
+    Convertы a FASTA file with multiline sequences into a FASTA file
     where each sequence is written on a single line.
 
     Args:
@@ -14,47 +15,9 @@ def convert_multiline_fasta_to_oneline(input_path: str, output_path: str) -> Non
     Returns:
         None: The converted FASTA file is written to output_path.
     """
-    with open(input_path, 'r') as multiline, open(output_path, 'w') as oneline:
-        records = SeqIO.parse(multiline, 'fasta')
-        SeqIO.write(records, oneline, 'fasta')
-
-
-def convert_multiline_fasta_to_oneline_old(
-    input_fasta: str, output_fasta: str | None = None
-) -> None:
-    """
-    Converts *.fasta with multi-line sequences into *.fasta with one-line sequences.
-
-    Arguments:
-    input_fasta: absolute path to input FASTA-file
-    output_fasta: absolute path to output FASTA-file
-
-    Returns:
-    None
-    """
-    if output_fasta is None:
-        output_path = assistant_ulitities.make_output_path(input_fasta, "output.fasta")
-    else:
-        output_path = os.path.join(output_fasta)
-    input_path = os.path.join(input_fasta)
-    with open(input_path, "r") as input_fasta_file, open(
-        output_path, "a"
-    ) as output_fasta_file:
-        current_sequence = []
-        name = None
-        for line in input_fasta_file:
-            line = line.strip()
-            if line.startswith(">"):
-                if name is not None:
-                    output_fasta_file.write(
-                        name + "\n" + "".join(current_sequence) + "\n"
-                    )
-                name = line
-                current_sequence = []
-            else:
-                current_sequence.append(line)
-        if name is not None:
-            output_fasta_file.write(name + "\n" + "".join(current_sequence) + "\n")
+    with open(input_path, "r") as multiline, open(output_path, "w") as oneline:
+        records = SeqIO.parse(multiline, "fasta")
+        SeqIO.write(records, oneline, "fasta")
 
 
 def parse_blast_output(input_file: str, output_file: str | None = None) -> None:
