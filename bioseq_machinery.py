@@ -1,30 +1,56 @@
 from abc import ABC, abstractmethod
 
 class BiologicalSequence(ABC):
+    """Abstract base class for biological sequences (DNA, RNA, proteins)."""
     
     def __init__(self, sequence):
+        """
+        Initialize the sequence.
+        
+        Args:
+            sequence (str): The biological sequence.
+        """
         self.sequence = sequence
                 
     def __len__(self):
+        """Return the length of the sequence."""
         return len(self.sequence)
         
     @property
     @abstractmethod
     def ALPHABET(self) -> set[str]:
+        """Return the set of valid symbols for this type of sequence."""
         pass
     
     def check_alphabet(self):
+        """
+        Check if the sequence contains only valid symbols.
+        
+        Returns:
+            bool: True if all symbols are in the ALPHABET, False otherwise.
+        """
         return set(self.sequence).issubset(self.ALPHABET)
     
     @abstractmethod
     def __str__(self) -> str:
+        """Return a human-readable string representation of the sequence."""
         pass
     
     @abstractmethod
     def __getitem__(self, index):
+        """
+        Allow indexing and slicing of the sequence.
+        
+        Args:
+            index (int or slice): Position or slice of the sequence.
+            
+        Returns:
+            str: Subsequence or single symbol.
+        """
         pass
     
 class NucleicAcidSequence(BiologicalSequence):
+    """Base class for nucleic acid sequences (DNA/RNA). Cannot be instantiated directly."""
     
     def __init__(self, sequence):
         if type(self) is NucleicAcidSequence:
@@ -36,12 +62,20 @@ class NucleicAcidSequence(BiologicalSequence):
             raise ValueError(f"Sequence contains invalid symbols. Allowed symbols: {self.ALPHABET}")
     
     def __str__(self):
+        """Return a human-readable string representation of the nucleic acid sequence."""
         return "Oligonucleotide : " +self.sequence
         
     def __getitem__(self, index):
+        """Return a single nucleotide or a slice of the sequence."""
         return self.sequence[index]
     
     def complement(self):
+        """
+        Return the complementary sequence.
+        
+        Returns:
+            NucleicAcidSequence: Complement sequence of the same type as self.
+        """
         replication_dict = {
         "A": "T",
         "a": "t",
@@ -57,18 +91,39 @@ class NucleicAcidSequence(BiologicalSequence):
         return self.__class__(''.join(replication_dict[nucleotide] for nucleotide in self.sequence))
         
     def reverse(self):
+        """
+        Return the reversed sequence.
+        
+        Returns:
+            NucleicAcidSequence: Reversed sequence of the same type as self.
+        """
         return self.__class__(self.sequence[::-1])
         
     def reverse_complement(self):
+        """
+        Return the reverse complement of the sequence.
+        
+        Returns:
+            NucleicAcidSequence: Reverse complement of the sequence.
+        """
         return self.complement().reverse()
     
     
 class DNASequence(NucleicAcidSequence):
+    """Class representing a DNA sequence."""
+    
     @property
     def ALPHABET(self):
+        """Return the set of valid DNA nucleotides."""
         return set('ATGCatgc')
     
     def transcribe(self):
+        """
+        Transcribe DNA to RNA.
+        
+        Returns:
+            RNASequence: Transcribed RNA sequence.
+        """
         transcription_dict = {
         "A": "U",
         "a": "u",
@@ -82,11 +137,16 @@ class DNASequence(NucleicAcidSequence):
         return RNASequence(''.join(transcription_dict[nucleotide] for nucleotide in self.sequence))
     
 class RNASequence(NucleicAcidSequence):
+    """Class representing an RNA sequence."""
+    
     @property
     def ALPHABET(self):
+        """Return the set of valid RNA nucleotides."""
         return set('AUGCaugc')
     
 class AminoAcidSequence(BiologicalSequence):
+    """Class representing an amino acid (protein) sequence."""
+    
     AMINO_ACID_CATEGORIES = {
     'nonpolar': {'A', 'V', 'L', 'I', 'M', 'F', 'W'},
     'polar': {'S', 'T', 'C', 'Y', 'N', 'Q'},
@@ -98,20 +158,38 @@ class AminoAcidSequence(BiologicalSequence):
     
     @property
     def ALPHABET(self):
+        """Return the set of valid amino acid symbols (including lowercase)."""
         return set('ACDEFGHIKLMNOPQRSTVWUXYacdefghiklmnopqrstvwuxy')
     
     def __init__(self, sequence):
+        """
+        Initialize amino acid sequence and check validity.
+        
+        Args:
+            sequence (str): Amino acid sequence.
+            
+        Raises:
+            ValueError: If sequence contains unknown amino acids.
+        """
         super().__init__(sequence)
         if not self.check_alphabet():
             raise ValueError("Sequence contains unknown aminoacid.")
         
     def __str__(self):
+        """Return a human-readable string representation of the protein."""
         return "Oligoprotein : " + self.sequence
         
     def __getitem__(self, index):
+        """Return a single amino acid or a slice of the sequence."""
         return self.sequence[index]
     
     def categorize(self):
+        """
+        Count amino acids in each chemical category.
+        
+        Returns:
+            dict: Dictionary mapping categories to counts.
+        """
         counts = {
             'nonpolar': 0,
             'polar': 0,
