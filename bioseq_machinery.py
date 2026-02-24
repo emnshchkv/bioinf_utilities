@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 class BiologicalSequence(ABC):
     """Abstract base class for biological sequences (DNA, RNA, proteins)."""
     
-    def __init__(self, sequence):
+    def __init__(self, sequence: str) -> None:
         """
         Initialize the sequence.
         
@@ -12,7 +12,7 @@ class BiologicalSequence(ABC):
         """
         self.sequence = sequence
                 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return the length of the sequence."""
         return len(self.sequence)
         
@@ -22,7 +22,7 @@ class BiologicalSequence(ABC):
         """Return the set of valid symbols for this type of sequence."""
         pass
     
-    def check_alphabet(self):
+    def check_alphabet(self) -> bool:
         """
         Check if the sequence contains only valid symbols.
         
@@ -37,7 +37,7 @@ class BiologicalSequence(ABC):
         pass
     
     @abstractmethod
-    def __getitem__(self, index):
+    def __getitem__(self, index: int|slice) -> 'str|BiologicalSequence':
         """
         Allow indexing and slicing of the sequence.
         
@@ -45,14 +45,15 @@ class BiologicalSequence(ABC):
             index (int or slice): Position or slice of the sequence.
             
         Returns:
-            str: Subsequence or single symbol.
+            str: Single symbol if index is int.
+            Same class object: subsequence if index is slice.
         """
         pass
     
 class NucleicAcidSequence(BiologicalSequence):
     """Base class for nucleic acid sequences (DNA/RNA). Cannot be instantiated directly."""
     
-    def __init__(self, sequence):
+    def __init__(self, sequence: str) -> None:
         if type(self) is NucleicAcidSequence:
             raise NotImplementedError(
                 "Direct instantiation of the Nucleic Acid Sequence class is not allowed."
@@ -61,15 +62,26 @@ class NucleicAcidSequence(BiologicalSequence):
         if not self.check_alphabet():
             raise ValueError(f"Sequence contains invalid symbols. Allowed symbols: {self.ALPHABET}")
     
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable string representation of the nucleic acid sequence."""
         return "Oligonucleotide : " +self.sequence
         
-    def __getitem__(self, index):
-        """Return a single nucleotide or a slice of the sequence."""
-        return self.sequence[index]
+    def __getitem__(self, index: int|slice) -> 'str|NucleicAcidSequence':
+        """
+        Return a single symbol or a subsequence object.
+        
+        Args:
+            index (int | slice): Position or slice of the sequence.
+        
+        Returns:
+            str: Single symbol if index is int.
+            Same class object: subsequence if index is slice.
+        """
+        if isinstance(index, int):
+            return self.sequence[index]
+        return self.__class__(self.sequence[index])
     
-    def complement(self):
+    def complement(self) -> 'NucleicAcidSequence':
         """
         Return the complementary sequence.
         
@@ -90,7 +102,7 @@ class NucleicAcidSequence(BiologicalSequence):
         }
         return self.__class__(''.join(replication_dict[nucleotide] for nucleotide in self.sequence))
         
-    def reverse(self):
+    def reverse(self) -> 'NucleicAcidSequence':
         """
         Return the reversed sequence.
         
@@ -99,7 +111,7 @@ class NucleicAcidSequence(BiologicalSequence):
         """
         return self.__class__(self.sequence[::-1])
         
-    def reverse_complement(self):
+    def reverse_complement(self) -> 'NucleicAcidSequence':
         """
         Return the reverse complement of the sequence.
         
@@ -113,11 +125,11 @@ class DNASequence(NucleicAcidSequence):
     """Class representing a DNA sequence."""
     
     @property
-    def ALPHABET(self):
+    def ALPHABET(self) -> set[str]:
         """Return the set of valid DNA nucleotides."""
         return set('ATGCatgc')
     
-    def transcribe(self):
+    def transcribe(self) -> 'RNASequence':
         """
         Transcribe DNA to RNA.
         
@@ -140,7 +152,7 @@ class RNASequence(NucleicAcidSequence):
     """Class representing an RNA sequence."""
     
     @property
-    def ALPHABET(self):
+    def ALPHABET(self) -> set[str]:
         """Return the set of valid RNA nucleotides."""
         return set('AUGCaugc')
     
@@ -157,11 +169,11 @@ class AminoAcidSequence(BiologicalSequence):
     }
     
     @property
-    def ALPHABET(self):
+    def ALPHABET(self) -> set[str]:
         """Return the set of valid amino acid symbols (including lowercase)."""
         return set('ACDEFGHIKLMNOPQRSTVWUXYacdefghiklmnopqrstvwuxy')
     
-    def __init__(self, sequence):
+    def __init__(self, sequence: str) -> None:
         """
         Initialize amino acid sequence and check validity.
         
@@ -175,15 +187,26 @@ class AminoAcidSequence(BiologicalSequence):
         if not self.check_alphabet():
             raise ValueError("Sequence contains unknown aminoacid.")
         
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a human-readable string representation of the protein."""
         return "Oligoprotein : " + self.sequence
         
-    def __getitem__(self, index):
-        """Return a single amino acid or a slice of the sequence."""
-        return self.sequence[index]
+    def __getitem__(self, index: int|slice) -> 'str|AminoAcidSequence':
+        """
+        Return a single symbol or a subsequence object.
+        
+        Args:
+            index (int | slice): Position or slice of the sequence.
+        
+        Returns:
+            str: Single symbol if index is int.
+            Same class object: subsequence if index is slice.
+        """
+        if isinstance(index, int):
+            return self.sequence[index]
+        return self.__class__(self.sequence[index])
     
-    def categorize(self):
+    def categorize(self) -> dict[str, int]:
         """
         Count amino acids in each chemical category.
         
