@@ -55,7 +55,7 @@ def parse_blast_output(input_path: str, output_path: str) -> None:
             continue
 
 
-# AI assisted with the following function
+# AI wrote the following function
 def select_genes_from_gbk_to_fasta(
     input_path: str,
     genes: tuple[str],
