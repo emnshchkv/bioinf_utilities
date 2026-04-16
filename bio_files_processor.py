@@ -1,65 +1,38 @@
-import os, re
-from scripts import assistant_ulitities
+import re
+from Bio import SeqIO
 
 
-def convert_multiline_fasta_to_oneline(
-    input_fasta: str, output_fasta: str | None = None
-) -> None:
+def convert_multiline_fasta_to_oneline(input_path: str, output_path: str) -> None:
     """
-    Converts *.fasta with multi-line sequences into *.fasta with one-line sequences.
+    Convertы a FASTA file with multiline sequences into a FASTA file
+    where each sequence is written on a single line.
 
-    Arguments:
-    input_fasta: absolute path to input FASTA-file
-    output_fasta: absolute path to output FASTA-file
+    Args:
+        input_path (str): Path to the input FASTA file (multiline format).
+        output_path (str): Path to the output FASTA file (one-line format).
 
     Returns:
-    None
+        None: The converted FASTA file is written to output_path.
     """
-    if output_fasta is None:
-        output_path = assistant_ulitities.make_output_path(input_fasta, "output.fasta")
-    else:
-        output_path = os.path.join(output_fasta)
-    input_path = os.path.join(input_fasta)
-    with open(input_path, "r") as input_fasta_file, open(
-        output_path, "a"
-    ) as output_fasta_file:
-        current_sequence = []
-        name = None
-        for line in input_fasta_file:
-            line = line.strip()
-            if line.startswith(">"):
-                if name is not None:
-                    output_fasta_file.write(
-                        name + "\n" + "".join(current_sequence) + "\n"
-                    )
-                name = line
-                current_sequence = []
-            else:
-                current_sequence.append(line)
-        if name is not None:
-            output_fasta_file.write(name + "\n" + "".join(current_sequence) + "\n")
+    with open(input_path, "r") as multiline, open(output_path, "w") as oneline:
+        records = SeqIO.parse(multiline, "fasta")
+        SeqIO.write(records, oneline, "fasta")
 
 
-def parse_blast_output(input_file: str, output_file: str | None = None) -> None:
+def parse_blast_output(input_path: str, output_path: str) -> None:
     """
     Parses the BLAST_output_file.txt and extracts the first protein from the Description column for each QUERY.
 
-    Arguments:
-    input_file: absolute path to BLAST_output_file.txt
-    output_file: absolute path to the extracted proteins file
+    Args:
+        input_file: absolute path to BLAST_output_file.txt
+        output_path: absolute path to the extracted proteins file
 
     Returns:
-    None
+        None
     """
-    if output_file is None:
-        output_path = assistant_ulitities.make_output_path(
-            input_file, "output_parse_blast.txt"
-        )
-    else:
-        output_path = os.path.join(output_file)
-    input_path = os.path.join(input_file)
+
     with open(input_path, "r") as blast_output, open(
-        output_path, "a"
+        output_path, "w"
     ) as parsed_blast_output:
         query = ""
         placed_in_section, table_start = False, False
@@ -82,47 +55,59 @@ def parse_blast_output(input_file: str, output_file: str | None = None) -> None:
             continue
 
 
+# AI wrote the following function
 def select_genes_from_gbk_to_fasta(
-    input_gbk: str,
+    input_path: str,
+    genes: tuple[str],
+    output_path: str,
     n_before: int = 1,
     n_after: int = 1,
-    *genes: str | tuple[str],
-    output_fasta: str = "output.fasta"
-):
+) -> None:
     """
-    Extracts amino acid sequences adjacent to the genes of interest from the GBK-file. The genes of interest are not displayed.
+    Extract amino acid sequences of CDS features neighboring specified genes
+    from a GenBank file and write them to a FASTA file.
 
-    Arguments:
-    input_gbk: absolute path to GBK-file
-    genes: genes of interest which neighbors are being searched
-    n_before, n_after: the number of genes before and after the gene of interest
-    output_fasta: name of the output FASTA-file
+    The genes of interest themselves are excluded from the output.
+    Neighboring genes are determined based on their order among CDS features
+    within each record of the GenBank file.
+
+    Args:
+        input_path (str): Path to the input GenBank (.gbk/.gbff) file.
+        genes (tuple[str]): Gene names (as specified in the /gene qualifier) whose neighboring CDS features should be extracted.
+        output_path (str): Path to the output FASTA file.
+        n_before (int) default=1: Number of CDS features to include upstream (before) each gene of interest.
+        n_after (int) default=1: Number of CDS features to include downstream (after) each gene of interest.
 
     Returns:
-    None
+        None: Writes the selected amino acid sequences to the specified FASTA file.
     """
-    output_path = assistant_ulitities.make_output_path(input_gbk, output_fasta)
-    input_path = os.path.join(input_gbk)
-    with open(input_path, "r") as input_gbk_file:
-        gene_protein = assistant_ulitities.extract_gene_and_protein(input_gbk_file)
+    records = list(SeqIO.parse(input_path, "genbank"))
+    cds_features = []
+    for record in records:
+        for feature in record.features:
+            if feature.type == "CDS":
+                gene_name = feature.qualifiers.get("gene", [None])[0]
+                translation = feature.qualifiers.get("translation", [None])[0]
+                if gene_name and translation:
+                    cds_features.append((gene_name, translation))
+
     interest_indexes = []
-    for gene in genes:
-        for pair_gene_protein in gene_protein:
-            if gene == pair_gene_protein[0]:
-                interest_indexes.append(gene_protein.index(pair_gene_protein))
-    neighbours_indexes = []
+
+    for i, (gene_name, _) in enumerate(cds_features):
+        if gene_name in genes:
+            interest_indexes.append(i)
+
+    neighbours_indexes = set()
+
     for index in interest_indexes:
-        start = index - n_before
-        stop = index + n_after + 1
-        if index - n_before < 0:
-            start = 0
-        elif index + n_after + 1 > len(gene_protein):
-            stop = len(gene_protein)
+        start = max(0, index - n_before)
+        stop = min(len(cds_features), index + n_after + 1)
+
         for i in range(start, stop):
-            neighbours_indexes.append(i)
-        neighbours_indexes.remove(index)
-    with open(output_path, "a") as output_fasta_file:
-        for index in neighbours_indexes:
-            output_fasta_file.write(
-                ">" + gene_protein[index][0] + "\n" + gene_protein[index][1] + "\n"
-            )
+            if i != index:
+                neighbours_indexes.add(i)
+
+    with open(output_path, "w") as output_fasta_file:
+        for i in sorted(neighbours_indexes):
+            gene_name, translation = cds_features[i]
+            output_fasta_file.write(f">{gene_name}\n{translation}\n")
