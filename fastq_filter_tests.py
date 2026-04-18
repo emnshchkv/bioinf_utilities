@@ -145,11 +145,11 @@ class TestErrorHandling:
         with pytest.raises(FileNotFoundError):
             filter_fastq("non_existent_file.fastq", str(output_path))
 
-    def test_unknown_parameter_raises_type_error(self, sample_fastq, output_path):
-        """filter_fastq must raise TypeError for an unknown parameter."""
-        logger.error("Intentionally triggering TypeError (invalid parameter test)")
-        with pytest.raises(TypeError):
-            filter_fastq(str(sample_fastq), str(output_path), taxon="E.coli")
+    def test_wrong_parameter_raises_value_error(self, sample_fastq, output_path):
+        """filter_fastq must raise ValueError for a wrong value of a parameter."""
+        logger.error("Intentionally triggering ValueError (invalid parameter test)")
+        with pytest.raises(ValueError):
+            filter_fastq(str(sample_fastq), str(output_path), length_bounds=(-30, -60))
 
 
 def main():
