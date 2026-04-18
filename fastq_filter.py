@@ -4,14 +4,15 @@ from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
 from loguru import logger
 
+
 def setup_logging(log_file: str = "fastq_filter.log") -> None:
     """
     Configure loguru to write to both a file and the console.
- 
+
     Args:
         log_file (str): Path to the log file. Default is 'fastq_filter.log'.
     """
-    logger.remove() 
+    logger.remove()
 
     logger.add(
         sys.stderr,
@@ -19,7 +20,7 @@ def setup_logging(log_file: str = "fastq_filter.log") -> None:
         format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> [<level>{level}</level>] {message}",
         colorize=True,
     )
- 
+
     logger.add(
         log_file,
         level="DEBUG",
@@ -28,6 +29,7 @@ def setup_logging(log_file: str = "fastq_filter.log") -> None:
         retention="7 days",
         encoding="utf-8",
     )
+
 
 def _normalize_bounds(bounds: int | tuple) -> tuple:
     """
@@ -77,14 +79,17 @@ def filter_fastq(
     logger.info(
         "Start filtering: input='{}', output='{}', "
         "length=({}, {}), quality>={:.1f}, gc=({:.1f}, {:.1f})",
-        input_path, output_path,
-        length_left, length_right,
+        input_path,
+        output_path,
+        length_left,
+        length_right,
         quality_threshold,
-        gc_left, gc_right,
+        gc_left,
+        gc_right,
     )
-    
+
     total, passed = 0, 0
-    
+
     with open(output_path, "w") as out_handle:
 
         for record in SeqIO.parse(input_path, "fastq"):
@@ -101,26 +106,29 @@ def filter_fastq(
             ):
                 SeqIO.write(record, out_handle, "fastq")
                 passed += 1
-                
+
     logger.info(
         "Filtering complete: {} / {} sequences passed ({:.1f}%)",
-        passed, total, (passed / total * 100) if total else 0,
+        passed,
+        total,
+        (passed / total * 100) if total else 0,
     )
+
 
 def _parse_bounds(value: str) -> int | tuple:
     """
     Parse a bounds argument from the command line.
     Accepts either a single integer ("150") or a tuple ("25,150").
- 
+
     Args:
         value (str): The raw string value from argparse.
- 
+
     Returns:
         int or tuple of int: Parsed bounds.
     """
     value = value.strip()
     parts = [p.strip() for p in value.split(",")]
- 
+
     if len(parts) == 1:
         return int(parts[0])
     elif len(parts) == 2:
@@ -130,6 +138,7 @@ def _parse_bounds(value: str) -> int | tuple:
             f"Invalid bounds format: '{value}'. "
             "Expected a single integer or two comma separated integers, e.g. '150' or '25,150'."
         )
+
 
 def main():
     """Main function"""
@@ -145,27 +154,45 @@ def main():
                     python fastq_filter.py --input seqs.fastq --output filtered_seqs.fastq\\
                         --length-bounds 25,150 --quality 20 --gc-bounds 40,50 \\
                         --log-file seqs_filter.log
-                    """
+                    """,
     )
-    
-    parser.add_argument('--input', '-i', type=str, required=True,
-                        help='Input FASTQ file path')
-    
-    parser.add_argument('--output', '-o', type=str, required=True,
-                       help='Output FASTQ file path')
-    
-    parser.add_argument('--length-bounds', type=_parse_bounds, default=(0, 2**32),
-                       help='Min and max sequence length (default: 0,2**32)')
-    parser.add_argument('--quality', type=float, default=0,
-                       help='Min average Phred quality score required (default: 0)')
-    parser.add_argument('--gc-bounds', type=_parse_bounds, default=(0, 100),
-                       help='Min and max GC content (%) allowed (default: 0,100)')
-    parser.add_argument('--log-file', type=str, default='fastq_filter.log',
-                        help='Path to the log file (default: fastq_filter.log)')
-    
+
+    parser.add_argument(
+        "--input", "-i", type=str, required=True, help="Input FASTQ file path"
+    )
+
+    parser.add_argument(
+        "--output", "-o", type=str, required=True, help="Output FASTQ file path"
+    )
+
+    parser.add_argument(
+        "--length-bounds",
+        type=_parse_bounds,
+        default=(0, 2**32),
+        help="Min and max sequence length (default: 0,2**32)",
+    )
+    parser.add_argument(
+        "--quality",
+        type=float,
+        default=0,
+        help="Min average Phred quality score required (default: 0)",
+    )
+    parser.add_argument(
+        "--gc-bounds",
+        type=_parse_bounds,
+        default=(0, 100),
+        help="Min and max GC content (%) allowed (default: 0,100)",
+    )
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default="fastq_filter.log",
+        help="Path to the log file (default: fastq_filter.log)",
+    )
+
     args = parser.parse_args()
     setup_logging(args.log_file)
-    
+
     try:
         filter_fastq(
             input_path=args.input,
