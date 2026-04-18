@@ -74,7 +74,18 @@ def filter_fastq(
     """
 
     length_left, length_right = _normalize_bounds(length_bounds)
+
+    if length_left > length_right:
+        raise ValueError("Min length cannot be greater than max length.")
+    if length_left < 0 or length_right <= 0:
+        raise ValueError("Only positive values allowed.")
+
     gc_left, gc_right = _normalize_bounds(gc_bounds)
+
+    if gc_left > gc_right:
+        raise ValueError("Min GC-content cannot be greater than max GC-content.")
+    if gc_left < 0 or gc_right <= 0:
+        raise ValueError("Only positive values allowed.")
 
     logger.info(
         "Start filtering: input='{}', output='{}', "
