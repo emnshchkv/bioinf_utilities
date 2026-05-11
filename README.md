@@ -4,25 +4,32 @@ A collection of Python modules for common bioinformatics tasks: sequence manipul
 
 ## Modules
 
-The package consists of three independent modules:
+The package consists of 3 independent modules + test suite:
 
 - `bioseq_machinery.py` – object-oriented tools for DNA, RNA, and protein sequences.
-- `fastq_filter.py` – FASTQ quality filtering based on length, GC‑content, and average Phred score.
+- `fastq_filter.py` – FASTQ quality filtering based on length, GC‑content, and average Phred-score.
 - `bio_files_processor.py` – utilities for converting, parsing, and extracting data from biological file formats.
+- `fastq_filter_tests.py` – pytest test suite for `fastq_filter.py`.
 
 ## Installation
 
-No installation is required – simply place the `.py` files in your working directory or in a location accessible to Python. The modules use only the standard library and [Biopython](https://biopython.org/) (which you may need to install separately):
+No installation is required – simply place the `.py` files in your working directory or in a location accessible to Python. The modules depend on [biopython](https://biopython.org/) and [loguru](https://github.com/Delgan/loguru), which you can install with:
 
 ```bash
-pip install biopython
+pip install biopython loguru
+```
+
+For running the tests, also install pytest:
+
+```bash
+pip install pytest
 ```
 
 Then import the desired functions in your script:
 
 ```python
 from bioseq_machinery import DNASequence, RNASequence, AminoAcidSequence
-from fast_filter import filter_fastq
+from fastq_filter import filter_fastq
 from bio_files_processor import convert_multiline_fasta_to_oneline, parse_blast_output, select_genes_from_gbk_to_fasta
 ```
 
@@ -52,7 +59,7 @@ from bioseq_machinery import DNASequence, RNASequence, AminoAcidSequence
 
 # DNA operations
 dna = DNASequence("ATGCGTAt")
-print(dna)                       # Oligonucleotide : ATGCGTAt
+print(dna)                        # Oligonucleotide : ATGCGTAt
 print(dna.complement())           # TACGCATa
 print(dna.reverse_complement())   # aTACGCAT
 rna = dna.transcribe()            # RNASequence object
@@ -68,7 +75,7 @@ print(counts)  # e.g., {'nonpolar': 8, 'polar': 5, '+ charged': 2, ...}
 
 ## 2. FASTQ Filtering (`fastq_filter.py`)
 
-The function `filter_fastq` reads a FASTQ file, applies filters, and writes passing reads to a new file.
+The function `filter_fastq` reads a FASTQ file, applies filters, and writes passing reads to a new file. Progress and results are logged via `loguru` to both the console and a log file.
 
 ### Function Signature
 
@@ -86,13 +93,13 @@ filter_fastq(
 - `input_path` – path to the input FASTQ file.
 - `output_path` – path where filtered reads will be saved.
 - `length_bounds` – single integer (maximum length) or tuple `(min, max)`. Default `(0, 2**32)` (no practical limit).
-- `quality_threshold` – minimum average Phred quality score.
+- `quality_threshold` – minimum average Phred quality score. Default `0`.
 - `gc_bounds` – single integer (maximum GC%) or tuple `(min, max)`. Default `(0, 100)`.
 
 ### Usage Examples
 
 ```python
-from fast_filter import filter_fastq
+from fastq_filter import filter_fastq
 
 # Keep reads with length 50–150 bp, average quality ≥ 20, GC% between 35% and 60%
 filter_fastq(
@@ -105,6 +112,20 @@ filter_fastq(
 
 # Only filter by maximum length (200 bp) and no other restrictions
 filter_fastq("raw.fastq", "trimmed.fastq", length_bounds=200)
+```
+
+### Command-line Interface
+
+`fastq_filter.py` can also be run directly from the command line:
+
+```bash
+# Basic usage
+python fastq_filter.py --input seqs.fastq --output filtered_seqs.fastq
+
+# With all filters and a custom log file
+python fastq_filter.py --input seqs.fastq --output filtered_seqs.fastq \
+    --length-bounds 25,150 --quality 20 --gc-bounds 40,60 \
+    --log-file seqs_filter.log
 ```
 
 ---
@@ -129,7 +150,7 @@ Parses a **legacy plain‑text BLAST output** file (the default `-outfmt 0` pair
 parse_blast_output("blast_results.txt", "extracted_proteins.txt")
 ```
 
-**Note:** This parser is tailored to a specific output layout. For more robust parsing, consider using Biopython’s `Bio.SearchIO` with tabular BLAST output (`-outfmt 6` or `7`).
+**Note:** This parser is tailored to a specific output layout. For more robust parsing, consider using Biopython's `Bio.SearchIO` with tabular BLAST output (`-outfmt 6` or `7`).
 
 ### `select_genes_from_gbk_to_fasta`
 
@@ -156,43 +177,48 @@ The function collects all CDS features with a `/gene` qualifier and a `/translat
 
 ---
 
-## Error Handling
+## 4. Tests (`fastq_filter_tests.py`)
 
-- All functions perform basic input validation (file existence, format compatibility) and raise appropriate exceptions (`ValueError`, `FileNotFoundError`, `RuntimeError`) with descriptive messages.
-- Sequence classes validate the alphabet at instantiation and raise `ValueError` if invalid characters are found.
-- Warnings are issued for missing qualifiers or genes not found in the file.
+The test suite covers `filter_fastq` using `pytest`. Tests are grouped into four classes:
 
-## Dependencies
+| Class                | What is tested                                              |
+|----------------------|-------------------------------------------------------------|
+| `TestLengthFilter`   | Upper bound, lower bound, single-int shorthand              |
+| `TestQualityFilter`  | Quality threshold excludes low-quality reads                |
+| `TestGCFilter`       | GC upper bound excludes GC-rich reads                       |
+| `TestFileIO`         | Output file is created; empty output when nothing passes    |
+| `TestErrorHandling`  | `FileNotFoundError` for missing input; `ValueError` for invalid bounds |
 
-- **Python** ≥ 3.7
-- **Biopython** – required for `fast_filter.py` and `bio_files_processor.py` (installation: `pip install biopython`)
+Run the tests with:
 
-All other modules use only the Python standard library.
+```bash
+pytest fastq_filter_tests.py
+```
+
+Test output is logged to `tests.log` via `loguru`.
 
 ---
 
-## Example Workflow
+## Error Handling
 
-```python
-from bioseq_machinery import DNASequence
-from fast_filter import filter_fastq
-from bio_files_processor import select_genes_from_gbk_to_fasta
+- `filter_fastq` raises `ValueError` when bounds are logically invalid (e.g., min > max, or negative values).
+- `filter_fastq` raises `FileNotFoundError` when the input file does not exist.
+- Sequence classes validate the alphabet at instantiation and raise `ValueError` if invalid characters are found.
+- `NucleicAcidSequence` cannot be instantiated directly and raises `NotImplementedError`.
 
-# 1. Clean up sequencing reads
-filter_fastq("raw.fastq", "clean.fastq", quality_threshold=25, length_bounds=(50, 200))
+---
 
-# 2. Analyse a DNA sequence
-my_dna = DNASequence("ATCGATCG")
-print(my_dna.reverse_complement())
+## Dependencies
 
-# 3. Extract neighboring genes of a locus of interest
-select_genes_from_gbk_to_fasta(
-    "ecoli.gbk",
-    genes=("rpsA", "rplB"),
-    output_path="neighbors.faa",
-    n_before=3,
-    n_after=2
-)
+- **Python** == 3.13
+- **Biopython** == 1.86 – required for `fastq_filter.py` and `bio_files_processor.py`
+- **loguru** == 0.7.3 – required for `fastq_filter.py` and `fastq_filter_tests.py`
+- **pytest** == 8.4.2 – required for running `fastq_filter_tests.py`
+
+Install all at once:
+
+```bash
+pip install biopython loguru pytest
 ```
 
 ## License
